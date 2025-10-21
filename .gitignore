@@ -164,6 +164,8 @@ cython_debug/
 test.ipynb
 
 /instructions
-/data
+
+/data/*
+!/data/
 !/data/downloadDaily.sh
 /output
