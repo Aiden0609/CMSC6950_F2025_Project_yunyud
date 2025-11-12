@@ -167,5 +167,5 @@ test.ipynb
 
 /data/*
 !/data/
-!/data/downloadDaily.sh
+!/data/*.sh
 /output
