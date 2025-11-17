@@ -5,31 +5,28 @@ from typing import List
 
 import pandas as pd
 
-#%%
-def aggregateCSV(path = "./data/StJohns"):
+
+def aggregateCSV(path) -> pd.DataFrame:
+    '''Aggregate raw csv files of a city
+    Raw csv files can be found in ../data/raw/${Name of city}$
+    Return one concatenated file of a city
+    '''
     
-    pattern = os.path.join(path, f"station_*_daily_*.csv")
-    files: List[str] = sorted(glob.glob(pattern))
+    files: List[str] = sorted(glob.glob(path))
     if not files:
-        raise FileNotFoundError(f"No matching files found for pattern: {pattern}")
+        raise FileNotFoundError(f"No matching files found in: {path}")
 
     dfs = [pd.read_csv(file) for file in files]
     all_df = pd.concat(dfs, ignore_index=True).drop_duplicates()
 
-    output_path = os.path.join(path, f"stjohns_daily_combined.csv")
-    all_df.to_csv(output_path, index=False)
-    print(f"Output path: {output_path}")
     return all_df
 
-#%%
-def preprocessingDf(path = "./data/StJohns"):
-    
-    combined_path = os.path.join(path, f"stjohns_daily_combined.csv")
-    if not os.path.exists(combined_path):
-        df = aggregateCSV(path=path)
-    else:
-        df = pd.read_csv(combined_path)
 
+def preprocessing(city, base="../data/raw") -> pd.DataFrame:
+
+    path = os.path.join(base, f"{city}/{city}*.csv")
+    df = aggregateCSV(path)
+    
     numeric_cols = [
         "Max Temp (°C)",
         "Min Temp (°C)",
@@ -52,4 +49,11 @@ def preprocessingDf(path = "./data/StJohns"):
 
 
 if __name__ == "__main__":
-    preprocessingDf()
+    CITIES = ["StJohns", "Montreal", "Calgary", "TorontoCity", "Vancouver"]
+    for city in CITIES:
+        df = preprocessing(city, base="../data/raw")
+        output_path = f"../data/processed/{city}.csv"
+        df.to_csv(output_path, index=False)
+        print(f"File saved as {output_path}")
+
+# %%

@@ -166,6 +166,5 @@ test.ipynb
 /instructions
 
 /data/*
-!/data/
-!/data/*.sh
-/output
+/tests
+/figures
