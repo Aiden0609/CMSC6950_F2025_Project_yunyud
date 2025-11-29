@@ -1,88 +1,54 @@
 import numpy as np
 import pandas as pd
 
-def compute_extreme(df):
+def compute_thresholds(df, start, end):
+    df_ref = df[df["Year"].between(start, end)]
+    quant = df_ref.groupby("doy").agg({
+        "Max Temp (°C)": lambda x: np.percentile(x, 90),
+        "Min Temp (°C)": lambda x: np.percentile(x, 90),
+    })
+    quant = quant.rename(columns={
+        "Max Temp (°C)": "tmax90",
+        "Min Temp (°C)": "tmin90",
+    })
+    return quant
 
-    df_ref = df[df["Year"].between(1994, 2023)]
-
-    tmax = [[] for _ in range(366)]
-    tmin = [[] for _ in range(366)]
-
-    for _, row in df_ref.iterrows():
-        i = row["doy"]
-        tmax[i].append(row["Max Temp (°C)"])
-        tmin[i].append(row["Min Temp (°C)"])
-
-    return tmax, tmin
-
-def compute_thresholds(tmax, tmin):
-    w = []
-    c = []
-
-    for d in range(366):
-        # 5 day window indices
-        win = [(d + i) % 366 for i in (-2, -1, 0, 1, 2)]
-
-        tmax_window = []
-        tmin_window = []
-
-        for idx in win:
-            tmax_window.extend(tmax[idx])
-            tmin_window.extend(tmin[idx])
-
-        w.append(np.percentile(tmax_window, 90) if tmax_window else np.nan)
-        c.append(np.percentile(tmin_window, 10) if tmin_window else np.nan)
-
-    return w, c
-
-def compute_spell_index(condition):
-    """
-    condition: Boolean array, True where extreme event occurs.
-    Returns total length of all spells ≥6 days.
-    """
-    count = 0
-    current = 0
-
-    for v in condition:
-        if v:
-            current += 1
-        else:
-            if current >= 6:
-                count += current
-            current = 0
-
-    if current >= 6:
-        count += current
-
-    return count
-
-def compute_SDI(df):
+def mark_extreme(df, quant):
     df = df.copy()
-    df["Date/Time"] = pd.to_datetime(df["Date/Time"])
-    df["doy"] = df["Date/Time"].dt.dayofyear - 1
+    df["tmax90"] = df["doy"].map(quant["tmax90"])
+    df["tmin90"] = df["doy"].map(quant["tmin90"])
 
-    tmax, tmin = compute_extreme(df)
+    df["hot"] = ((df["Max Temp (°C)"] > df["tmax90"]) &
+                 (df["Min Temp (°C)"] > df["tmin90"])).astype(int)
+    df["cold"] = ((df["Max Temp (°C)"] < df["tmax90"]) &
+                 (df["Min Temp (°C)"] < df["tmin90"])).astype(int)
+    return df
 
-    w, c = compute_thresholds(tmax, tmin)
+def detect_spells(binary_arr):
+    spells = []
+    start = None
+    for i, x in enumerate(binary_arr):
+        if x == 1 and start is None:
+            start = i
+        elif x == 0 and start is not None:
+            if i - start >= 3:
+                spells.append((start, i - 1))
+            start = None
 
-    results = []
+    if start is not None and len(binary_arr) - start >= 3:
+        spells.append((start, len(binary_arr) - 1))
+    return spells
 
-    for year, dfg in df.groupby("Year"):
-        dfg = dfg.sort_values("doy")
+def compute_wsdi(df):
+    years = df["Year"].unique()
+    results = {}
 
-        warm = dfg["Max Temp (°C)"].values > np.array([w[d] for d in dfg["doy"]])
-        cold = dfg["Min Temp (°C)"].values < np.array([c[d] for d in dfg["doy"]])
+    for y in years:
+        sub = df[df["Year"] == y].sort_values("doy")
+        arr = sub["hot"].tolist()
+        spells = detect_spells(arr)
+        lengths = [end - start + 1 for start, end in spells]
+        results[y] = lengths
+    return results
 
-        WSDI = compute_spell_index(warm)
-        CSDI = compute_spell_index(cold)
 
-        results.append({"Year": year, "WSDI": WSDI, "CSDI": CSDI})
-
-    return pd.DataFrame(results)
-
-if __name__ == "__main__":
-    df = pd.read_csv("./data/processed/StJohns.csv")
-
-    results = compute_SDI(df)
-
-    print(results)
