@@ -29,25 +29,24 @@ def data_padding(df: pd.DataFrame):
             df,
             on=["Year", "Month", "Day", "doy"],
             how="left"
-        ).sort_values(["Year", "doy"])
+        )
 
         full.append(merged)
 
     return pd.concat(full, ignore_index=True)
 
 
-def compute_thresholds(df):
+def compute_thresholds(df_ref):
     """
     Compute daily percentile thresholds for maximum and
-    minimum temprature using a 30-year reference period (1994–2023),
+    minimum temprature using a 30-year reference period,
     and add corresponding columns
     
     :param df: padded dataframe
     """
-    df_ref = df[df["Year"].between(1994, 2023)]
     quant = df_ref.groupby("doy").agg({
-        "Max Temp": lambda x: np.percentile(x, 90),
-        "Min Temp": lambda x: np.percentile(x, 90),
+        "Max Temp": lambda x: np.percentile(x.dropna(), 90),
+        "Min Temp": lambda x: np.percentile(x.dropna(), 90),
     })
     quant = quant.rename(columns={
         "Max Temp": "tmax90",
@@ -133,11 +132,15 @@ def compute_wsdi(df):
     """
     
     df_full = data_padding(df)
+    df_ref = df_full[df_full["Year"].between(1994, 2023)]
+    if df_ref.empty:
+        df_ref = df_full
 
-    quant = compute_thresholds(df_full)
+    quant = compute_thresholds(df_ref)
 
     df_extreme = mark_extreme(df_full, quant)
-
+    df_extreme["spell_id"] = -1
+    
     results = {}
     years = sorted(df_extreme["Year"].unique())
 
