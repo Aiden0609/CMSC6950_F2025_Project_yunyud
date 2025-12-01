@@ -1,10 +1,24 @@
 #%%
 import glob
 import os
+import re
 from typing import List
 
 import pandas as pd
 
+def clean_units(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove units like (°C), (mm), (kPa) from column names.
+    Example: "Max Temp (°C)" -> "Max Temp"
+    """
+    new_cols = {}
+    pattern = r"\s*\(.*?\)"    # "(...)" including spaces
+
+    for col in df.columns:
+        clean = re.sub(pattern, "", col).strip()
+        new_cols[col] = clean
+
+    return df.rename(columns=new_cols)
 
 def aggregateCSV(path) -> pd.DataFrame:
     '''Aggregate raw csv files of a city
@@ -26,12 +40,13 @@ def preprocessing(city, base="../data/raw") -> pd.DataFrame:
 
     path = os.path.join(base, f"{city}/{city}*.csv")
     df = aggregateCSV(path)
-    
+    df = clean_units(df)
+
     numeric_cols = [
-        "Max Temp (°C)",
-        "Min Temp (°C)",
-        "Mean Temp (°C)",
-        "Total Precip (mm)",
+        "Max Temp",
+        "Min Temp",
+        "Mean Temp",
+        "Total Precip",
     ]
     temporal_cols = ["Year", "Month", "Day"]
 
