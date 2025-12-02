@@ -44,8 +44,9 @@ for i, city in enumerate(cities):
 
 plt.yticks([])
 doy_ticks = [1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
-date_labels = [(datetime.date(2020,1,1) + datetime.timedelta(days=d-1)).strftime("%b %d")
-                for d in doy_ticks]
+date_labels = [(datetime.date(2020, 1, 1) +
+                datetime.timedelta(days=d-1)).strftime("%b %d")
+               for d in doy_ticks]
 plt.xticks(doy_ticks, date_labels)
 plt.xlabel("Day of Year")
 plt.title(f"Warm Spell Timeline for year {year}")

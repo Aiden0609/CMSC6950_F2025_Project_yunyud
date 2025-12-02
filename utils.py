@@ -8,6 +8,7 @@ CITY_CSV = {
     "Toronto": "./data/processed/TorontoCity.csv",
 }
 
+
 def load_single(city: str) -> pd.DataFrame:
     """Load preprocessed climate data of one single city."""
     if city not in CITY_CSV:
@@ -20,12 +21,12 @@ def load_single(city: str) -> pd.DataFrame:
     return df
 
 
-def load_many(cities: list=None, all=False) -> dict:
+def load_many(cities: list = None, all=False) -> dict:
     """Load csv files of each city in the list and encapsulate into one dict"""
     if all:
         return {city: load_single(city) for city in CITY_CSV}
     elif len(cities) < 1:
-        raise ValueError(f"Must contain valid city names.")
+        raise ValueError("Must contain valid city names.")
     cities_data = {}
     for city in cities:
         cities_data[city] = load_single(city)
@@ -38,6 +39,7 @@ def compute_yearly_extremes(df: pd.DataFrame) -> pd.DataFrame:
         "Max Temp": "max",
         "Min Temp": "min",
     }).reset_index()
+
 
 def compute_monthly(df: pd.DataFrame) -> pd.DataFrame:
     """
