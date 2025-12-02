@@ -141,25 +141,22 @@ def compute_wsdi(df):
     df_extreme = mark_extreme(df_full, quant)
     df_extreme["spell_id"] = -1
     
-    results = {}
     years = sorted(df_extreme["Year"].unique())
 
     for y in years:
         sub = df_extreme[df_extreme["Year"] == y].sort_values("doy")
         arr = sub["hot"].tolist()
+        idx_list = sub.index.tolist()
 
         spells = detect_spells(arr)
-        lengths = [end - start + 1 for start, end in spells]
-        results[y] = lengths
 
-        sub_idx = sub.index.to_list()
+        # assign spell_id
+        for sid, (s, e) in enumerate(spells):
+            true_s = idx_list[s]
+            true_e = idx_list[e]
+            df_extreme.loc[true_s:true_e, "spell_id"] = sid
 
-        for spell_id, (s, e) in enumerate(spells):
-            true_s = sub_idx[s]
-            true_e = sub_idx[e]
-            df_extreme.loc[true_s:true_e, "spell_id"] = spell_id
-
-    return results, df_extreme
+    return df_extreme
 
 if __name__ == "__main__":
     df = pd.read_csv("./data/processed/StJohns.csv")
