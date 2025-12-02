@@ -49,3 +49,7 @@ bash downloadDaily.sh
 cd ..
 python main.py
 ```
+
+## Reference
+ 1. https://www.climdex.org/learn/indices/#index-WSDI
+ 2. https://drought.emergency.copernicus.eu/data/factsheets/factsheet_warmColdSpellIndex.pdf

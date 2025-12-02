@@ -166,6 +166,5 @@ test.ipynb
 /instructions
 
 /data/*
-!/data/
-!/data/downloadDaily.sh
-/output
+heatmap.py
+/figures
