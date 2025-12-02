@@ -164,7 +164,7 @@ cython_debug/
 test.ipynb
 
 /instructions
-
+.DS_Store
 /data/*
 heatmap.py
 /figures
