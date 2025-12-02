@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def data_padding(df: pd.DataFrame):
     """
     Ensure there's a row for every date in a year, need this func
@@ -41,7 +42,7 @@ def compute_thresholds(df_ref):
     Compute daily percentile thresholds for maximum and
     minimum temprature using a 30-year reference period,
     and add corresponding columns
-    
+
     :param df: padded dataframe
     """
     quant = df_ref.groupby("doy").agg({
@@ -54,12 +55,13 @@ def compute_thresholds(df_ref):
     })
     return quant
 
+
 def mark_extreme(df, quant):
     """
     Label each day as a hot day (1) or non-hot day (0),
     follows the definition of WSDI
-    
-    :param df: padded dateframe 
+
+    :param df: padded dateframe
     :param quant: df with new columns, "tmax90", "tmin90", "hot"
     """
     df = df.copy()
@@ -68,8 +70,9 @@ def mark_extreme(df, quant):
 
     df["hot"] = ((df["Max Temp"] > df["tmax90"]) &
                  (df["Min Temp"] > df["tmin90"])).fillna(False).astype(int)
-    
+
     return df
+
 
 def detect_spells_poolday(binary_arr):
     """
@@ -81,7 +84,7 @@ def detect_spells_poolday(binary_arr):
     seq = False
     start, end = 0, 1
     one_count = 0
-    while(end<len(binary_arr)-1):
+    while (end < len(binary_arr) - 1):
         if binary_arr[end] == 1 and not seq:
             end = start
             seq = True
@@ -98,12 +101,13 @@ def detect_spells_poolday(binary_arr):
         end += 1
     return spells
 
+
 def detect_spells(binary_arr):
     """
     Detect warm spells in a sequence of 0/1 values.
     Here a simplified version is defined as:
         >= 3 consecutive hot days (1)
-    
+
     :param binary_arr: list of integer 0/1
     """
     spells = []
@@ -130,7 +134,7 @@ def compute_wsdi(df):
     After spell detection, assign a spell_id to each day within
     the spell and compute spell length per year
     """
-    
+
     df_full = data_padding(df)
     df_ref = df_full[df_full["Year"].between(1994, 2023)]
     if df_ref.empty:
@@ -140,7 +144,7 @@ def compute_wsdi(df):
 
     df_extreme = mark_extreme(df_full, quant)
     df_extreme["spell_id"] = -1
-    
+
     years = sorted(df_extreme["Year"].unique())
 
     for y in years:
@@ -158,11 +162,10 @@ def compute_wsdi(df):
 
     return df_extreme
 
+
 if __name__ == "__main__":
     df = pd.read_csv("./data/processed/StJohns.csv")
 
     wsdi, df = compute_wsdi(df)
 
     print(wsdi)
-
-

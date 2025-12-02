@@ -1,6 +1,5 @@
 # %%
 import plotly.express as px
-import matplotlib.pyplot as plt
 import pandas as pd
 from utils import load_many
 
@@ -50,7 +49,7 @@ fig.update_layout(
         lataxis=dict(range=[35, 75])
     )
 )
-# fig.write_image("./output/geomap.pdf")
+fig.write_image("./output/geomap.pdf")
 fig.show()
 
 

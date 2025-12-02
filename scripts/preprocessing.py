@@ -1,10 +1,10 @@
-#%%
 import glob
 import os
 import re
 from typing import List
 
 import pandas as pd
+
 
 def clean_units(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -20,12 +20,13 @@ def clean_units(df: pd.DataFrame) -> pd.DataFrame:
 
     return df.rename(columns=new_cols)
 
+
 def aggregateCSV(path) -> pd.DataFrame:
     '''Aggregate raw csv files of a city
     Raw csv files can be found in ../data/raw/${Name of city}$
     Return one concatenated file of a city
     '''
-    
+
     files: List[str] = sorted(glob.glob(path))
     if not files:
         raise FileNotFoundError(f"No matching files found in: {path}")
@@ -70,5 +71,3 @@ if __name__ == "__main__":
         output_path = f"../data/processed/{city}.csv"
         df.to_csv(output_path, index=False)
         print(f"File saved as {output_path}")
-
-# %%

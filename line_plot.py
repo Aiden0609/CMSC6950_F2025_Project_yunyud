@@ -1,11 +1,17 @@
 # %%
 import matplotlib.pyplot as plt
-import pandas as pd
 from utils import load_single, compute_monthly
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--city", default="Calgary")
+
+args = parser.parse_args()
+
+city = args.city
 
 c1 = "StJohns"
-c2 = "Calgary"
-# c2 = "Vancouver"
+c2 = args.city
 year = 2024            # 2003-2024
 
 df1 = load_single(c1)

@@ -5,6 +5,7 @@ from utils import (
     compute_monthly,
 )
 
+
 @pytest.mark.parametrize(
     "df_input,expected_max,expected_min",
     [
