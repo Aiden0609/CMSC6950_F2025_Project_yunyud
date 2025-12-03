@@ -30,6 +30,8 @@ Data are downloaded in `.csv` format using official Environment Canada batch dow
 ```bash
 git clone <this-repo-url>
 cd CMSC6950_F2025_Project_yunyud
+```
+```bash
 python3 -m venv venv
 source venv/bin/activate  # on Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -41,7 +43,10 @@ pytest tests/
 ```
 
 ### 3. Download raw data from Environment Canada
-
+Need wget to download all data, to install wget:
+```bash
+apt install wget
+```
 The project uses Environment Canada’s bulk-download interface.  
 From the repository root:
 ```bash
