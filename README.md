@@ -29,7 +29,7 @@ Data are downloaded in `.csv` format using official Environment Canada batch dow
 ### 1. Clone the repository and set up a virtual environment
 ```bash
 git clone <this-repo-url>
-cd cmsc6950_courseProject
+cd CMSC6950_F2025_Project_yunyud
 python3 -m venv venv
 source venv/bin/activate  # on Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -58,6 +58,7 @@ Daily data for each city is saved to `data/raw/`.
 
 ### 4. Preprocess raw data
 ```bash
+mkdir data/processed/
 cd scripts
 python preprocessing.py
 cd ..
